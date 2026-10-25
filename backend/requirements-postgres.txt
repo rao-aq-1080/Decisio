@@ -1,0 +1,4 @@
+# Only needed for the Docker/Postgres setup, not the native SQLite setup.
+# The Docker build installs this on top of requirements.txt.
+-r requirements.txt
+psycopg2-binary==2.9.9

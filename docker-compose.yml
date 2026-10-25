@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: decisio_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: decisio
+      POSTGRES_PASSWORD: decisio
+      POSTGRES_DB: decisio
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: decisio_mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"   # web UI
+      - "1025:1025"   # SMTP
+
+  # Qdrant runs on Qdrant Cloud's free tier (see .env) — no local container.
+  # The LLM runs on Groq's free hosted API (see .env) — no local container,
+  # no local model weights, minimal RAM/CPU load on your machine.
+
+  backend:
+    build: ./backend
+    container_name: decisio_backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - mailpit
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+
+volumes:
+  pgdata:
